@@ -4,9 +4,9 @@
 > **Khoa:** An toàn thông tin – Học viện Công nghệ Bưu chính Viễn thông (PTIT)  
 > **Đề tài số 01:** *"Tìm hiểu về các dạng tấn công và cách phòng chống DoS/DDoS. Tìm và demo một công cụ tấn công DoS/DDoS, sau đó đưa ra giải pháp phòng chống phù hợp."*  
 > **Tài liệu tham chiếu:**
-> - Hướng dẫn BTL: [CSATTT-BTL-2026.pdf](file:///T:/UNI/CSATTT/Project/CSATTT-BTL-2026.pdf)
-> - Mẫu báo cáo BTL: [ATTT-Mẫu báo cáo BTL.v1.0.docx](file:///T:/UNI/CSATTT/Project/ATTT-Mẫu%20báo%20cáo%20BTL.v1.0.docx) | [ATTT-Mẫu báo cáo BTL.v1.0.pdf](file:///T:/UNI/CSATTT/Project/ATTT-Mẫu%20báo%20cáo%20BTL.v1.0.pdf)
-> - Danh sách nhóm: [DanhSach Chia nhóm - Nhóm 1.pdf](file:///T:/UNI/CSATTT/Project/DanhSach%20Chia%20nhóm%20-%20Nhóm%201.pdf)
+> - Hướng dẫn BTL: [CSATTT-BTL-2026.pdf](file:///T:/UNI/CSATTT/CSATTT_Termpoject/CSATTT-BTL-2026.pdf)
+> - Mẫu báo cáo BTL: [ATTT-Mẫu báo cáo BTL.v1.0.docx](file:///T:/UNI/CSATTT/CSATTT_Termpoject/ATTT-Mẫu%20báo%20cáo%20BTL.v1.0.docx) | [ATTT-Mẫu báo cáo BTL.v1.0.pdf](file:///T:/UNI/CSATTT/CSATTT_Termpoject/ATTT-Mẫu%20báo%20cáo%20BTL.v1.0.pdf)
+> - Danh sách nhóm: [DanhSach Chia nhóm - Nhóm 1.pdf](file:///T:/UNI/CSATTT/CSATTT_Termpoject/DanhSach%20Chia%20nhóm%20-%20Nhóm%201.pdf)
 
 ---
 
@@ -199,18 +199,18 @@ flowchart TD
   * Hoàn thành bộ Slide thuyết trình (15-20 slide).
 * **Các công việc cụ thể:**
   1. **Viết báo cáo:**
-     * Trưởng nhóm tạo khung file Word từ mẫu `ATTT-Mẫu báo cáo BTL.v1.0.docx`.
-     * Ghép nội dung Chương 1 (Lê Anh Minh), Chương 2 (Nguyễn Đình Tiến), Chương 3 (Ứng Trọng Trình & Nguyễn Đinh Anh Quân).
+     * Trưởng nhóm (Lê Anh Minh) tạo khung file Word từ mẫu `ATTT-Mẫu báo cáo BTL.v1.0.docx`.
+     * Ghép nội dung: Chương 1 (Nguyễn Đinh Anh Quân), Chương 2 (Ứng Trọng Trình), Chương 3 (Nguyễn Đình Tiến phụ trách thiết lập lab & kịch bản tấn công; Lê Anh Minh phụ trách kịch bản phòng thủ & đánh giá so sánh).
      * Bổ sung hình ảnh demo vào Chương 3, viết lời giải thích chi tiết, bảng số liệu so sánh thời gian phản hồi, số kết nối bị chặn.
-     * Viết phần Mở đầu, Kết luận và Hướng phát triển.
+     * Viết phần Mở đầu, Kết luận và Hướng phát triển (Nguyễn Đinh Anh Quân soạn thảo, Lê Anh Minh hoàn thiện).
      * Lập danh mục tài liệu tham khảo theo đúng chuẩn IEEE/PTIT.
   2. **Làm Slide thuyết trình:**
-     * Thiết kế template slide chuyên nghiệp, ngắn gọn, súc tích (15-20 slides).
+     * Thiết kế template slide chuyên nghiệp, ngắn gọn, súc tích (15-20 slides) do Ứng Trọng Trình biên tập, Lê Anh Minh chuẩn hóa.
      * Phân chia phần trình bày trên slide tương ứng cho 4 thành viên:
-       * Thành viên 1 (Lê Anh Minh): Đặt vấn đề, Tổng quan DoS/DDoS (Slide 1 - 5).
-       * Thành viên 2 (Nguyễn Đình Tiến): Phân loại tấn công & Cơ chế công cụ demo (Slide 6 - 9).
-       * Thành viên 3 (Nguyễn Đinh Anh Quân): Mô hình thử nghiệm Lab & Kịch bản tấn công (Slide 10 - 14).
-       * Thành viên 4 (Ứng Trọng Trình): Giải pháp phòng chống, Kết quả thử nghiệm & Kết luận (Slide 15 - 19).
+       * Thành viên 1 (Nguyễn Đinh Anh Quân): Đặt vấn đề, Tổng quan lý thuyết DoS/DDoS (Chương 1 - Slide 1 - 5).
+       * Thành viên 2 (Ứng Trọng Trình): Phân loại tấn công, Cơ chế công cụ demo & Giải pháp phòng chống (Chương 2 - Slide 6 - 9).
+       * Thành viên 3 (Nguyễn Đình Tiến): Mô hình thử nghiệm Lab & Kịch bản tấn công thực nghiệm (Chương 3 - Slide 10 - 14).
+       * Thành viên 4 (Lê Anh Minh - Nhóm trưởng): Kịch bản phòng chống thực nghiệm, Đánh giá kết quả trước/sau & Kết luận (Chương 3, Kết luận - Slide 15 - 19).
 * **Sản phẩm đầu ra giai đoạn 3:**
   * Bản dự thảo Báo cáo BTL (file docx).
   * Bản dự thảo Slide thuyết trình (file pptx).
@@ -234,7 +234,7 @@ flowchart TD
      * File PDF báo cáo: `Nhom1.pdf`
      * File Slide: `Nhom1_Slide.pptx` (và `Nhom1_Slide.pdf`)
   3. **Nộp bài:**
-     * Nhóm trưởng (Ứng Trọng Trình) đăng nhập `lmsattt` và nộp đúng quy định.
+     * Nhóm trưởng (Lê Anh Minh) đăng nhập `lmsattt` và nộp đúng quy định.
      * Chụp ảnh màn hình biên lai nộp bài trên hệ thống để lưu trữ.
 * **Sản phẩm đầu ra giai đoạn 4:**
   * File báo cáo & slide hoàn chỉnh đã được upload lên `lmsattt`.
@@ -267,10 +267,10 @@ flowchart TD
 
 | TT | Thành viên thực hiện | Vai trò | Công việc / Nhiệm vụ cụ thể | Thời hạn hoàn thành | Sản phẩm bàn giao |
 | :---: | :--- | :---: | :--- | :---: | :--- |
-| **1** | **Ứng Trọng Trình**<br>*(MSV: B24DCCE271)* | Trưởng nhóm | - Lập kế hoạch chung, điều phối tiến độ nhóm.<br>- Nghiên cứu các giải pháp phòng thủ DoS/DDoS (Chương 2, 3).<br>- Cấu hình kịch bản phòng thủ (Nginx rate limit / iptables / Fail2ban).<br>- Soạn thảo Chương 3 (phần phòng thủ & đánh giá so sánh).<br>- Tổng hợp báo cáo, soát lỗi định dạng và nộp bài lên `lmsattt`. | 05/10/2026 | - Báo cáo tổng hợp hoàn thiện.<br>- Script cấu hình phòng thủ.<br>- Bằng chứng nộp bài lmsattt. |
-| **2** | **Lê Anh Minh**<br>*(MSV: B24DCCE180)* | Thành viên | - Nghiên cứu cơ sở lý thuyết tổng quan về DoS/DDoS (Chương 1).<br>- Phân loại các dạng tấn công (Layer 4, Layer 7, Amplification).<br>- Viết phần Mở đầu, Kết luận và Hướng phát triển của báo cáo.<br>- Thiết kế cấu trúc dàn ý bộ Slide thuyết trình (Slide 1 - 5). | 03/10/2026 | - Nội dung hoàn chỉnh Chương 1 + Mở đầu + Kết luận.<br>- Slide phần tổng quan lý thuyết. |
-| **3** | **Nguyễn Đinh Anh Quân**<br>*(MSV: B24DCCE222)* | Thành viên | - Xây dựng mô hình mạng Lab máy ảo (Attacker, Victim, Client).<br>- Tìm kiếm, cài đặt và cấu hình công cụ tấn công DoS/DDoS.<br>- Thực hiện kịch bản tấn công chưa phòng ngự, đo lường suy giảm dịch vụ.<br>- Bắt gói tin Wireshark, chụp ảnh bằng chứng thực nghiệm.<br>- Soạn thảo nội dung Chương 3 (phần thiết kế lab & thực nghiệm tấn công). | 02/10/2026 | - Môi trường Lab chạy ổn định.<br>- Bộ ảnh chụp kết quả demo kịch bản 1.<br>- File cấu hình lab và file pcap. |
-| **4** | **Nguyễn Đình Tiến**<br>*(MSV: B24DCCE264)* | Thành viên | - Nghiên cứu sâu cơ chế kỹ thuật công cụ tấn công đã chọn (Chương 2).<br>- Phân tích các lỗ hổng/điểm yếu hệ thống bị khai thác.<br>- Soạn thảo nội dung toàn bộ Chương 2 của báo cáo.<br>- Thiết kế, đồ họa hóa toàn bộ bộ Slide báo cáo (15-20 slide).<br>- Chuẩn bị kịch bản demo và video backup kịch bản demo. | 04/10/2026 | - Nội dung hoàn chỉnh Chương 2.<br>- Bộ Slide trình chiếu hoàn thiện.<br>- Video demo backup phòng ngừa rủi ro. |
+| **1** | **Lê Anh Minh**<br>*(MSV: B24DCCE180)* | Nhóm trưởng | - Quản lý tiến độ chung, lập kế hoạch và điều phối phân công công việc toàn nhóm.<br>- Nghiên cứu & triển khai giải pháp phòng thủ DoS/DDoS (Chương 3 - Mục 3.3, 3.4).<br>- Cấu hình kịch bản phòng thủ (Nginx rate limit / SYN Cookies / iptables / Fail2ban).<br>- Soạn thảo Chương 3 (phần giải pháp phòng ngự & đánh giá so sánh hiệu năng trước/sau khi phòng thủ).<br>- Tổng hợp toàn văn báo cáo BTL, soát lỗi định dạng chuẩn mẫu Khoa và chuẩn hóa Slide.<br>- Đại diện nhóm nộp bài lên hệ thống `lmsattt`. | 05/10/2026 | - Báo cáo tổng hợp hoàn thiện (Word & PDF).<br>- Script/cấu hình giải pháp phòng thủ.<br>- Bằng chứng nộp bài thành công trên `lmsattt`. |
+| **2** | **Nguyễn Đinh Anh Quân**<br>*(MSV: B24DCCE222)* | Thành viên | - Nghiên cứu cơ sở lý thuyết tổng quan về DoS/DDoS (Chương 1).<br>- Phân loại các dạng tấn công theo mô hình OSI (Layer 4, Layer 7, Amplification) và các nguyên lý phòng chống chung.<br>- Viết phần Mở đầu, Kết luận và Hướng phát triển của báo cáo.<br>- Thiết kế cấu trúc dàn ý khung của bộ Slide thuyết trình (Slide 1 - 5). | 03/10/2026 | - Nội dung hoàn chỉnh Chương 1 + Mở đầu + Kết luận.<br>- Dàn ý khung bộ Slide thuyết trình. |
+| **3** | **Nguyễn Đình Tiến**<br>*(MSV: B24DCCE264)* | Thành viên | - Thiết lập mô hình mạng Lab máy ảo thử nghiệm (Attacker, Victim Server, Client).<br>- Tìm kiếm, cài đặt và cấu hình công cụ tấn công DoS/DDoS (Slowloris / hping3).<br>- Thực hiện kịch bản tấn công chưa phòng ngự, đo lường sự suy giảm dịch vụ (CPU, RAM, kết nối treo).<br>- Thu thập log hệ thống, bắt gói tin Wireshark và chụp ảnh thực nghiệm chi tiết.<br>- Soạn thảo nội dung Chương 3 (Mục 3.1 Thiết kế Lab & Mục 3.2 Kịch bản thực nghiệm tấn công). | 02/10/2026 | - Môi trường Lab chạy ổn định.<br>- Bộ ảnh chụp kết quả demo kịch bản 1, log và file pcap.<br>- Kịch bản demo tấn công. |
+| **4** | **Ứng Trọng Trình**<br>*(MSV: B24DCCE271)* | Thành viên | - Nghiên cứu sâu cơ chế kỹ thuật công cụ tấn công đã chọn (Chương 2).<br>- Phân tích các lỗ hổng/điểm yếu hệ thống bị khai thác.<br>- Phân tích và xây dựng giải pháp phòng chống tương ứng.<br>- Soạn thảo toàn bộ nội dung Chương 2 của báo cáo.<br>- Biên tập, thiết kế đồ họa toàn bộ bộ Slide báo cáo (15-20 slide).<br>- Chuẩn bị kịch bản demo và video backup kịch bản demo phòng ngừa rủi ro. | 04/10/2026 | - Nội dung hoàn chỉnh Chương 2.<br>- Bộ Slide trình chiếu hoàn thiện.<br>- Video demo backup phòng ngừa rủi ro. |
 
 ---
 
@@ -286,10 +286,10 @@ Khi hoàn thành BTL, nhóm sẽ thống nhất cho điểm theo thang từ **0 
 
 | TT | Sinh viên thực hiện | Mã SV | Thái độ tham gia | Mức hoàn thành CV | Kỹ năng giao tiếp | Kỹ năng hợp tác | Kỹ năng lãnh đạo | Đánh giá chung |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 1 | **Ứng Trọng Trình** *(Trưởng nhóm)* | B24DCCE271 | 5 | 5 | 5 | 5 | 5 | Xuất sắc |
-| 2 | **Lê Anh Minh** | B24DCCE180 | 5 | 5 | 4 | 5 | 3 | Hoàn thành tốt |
-| 3 | **Nguyễn Đinh Anh Quân** | B24DCCE222 | 5 | 5 | 4 | 5 | 3 | Hoàn thành tốt |
-| 4 | **Nguyễn Đình Tiến** | B24DCCE264 | 5 | 5 | 5 | 5 | 4 | Hoàn thành tốt |
+| 1 | **Lê Anh Minh** *(Nhóm trưởng)* | B24DCCE180 | 5 | 5 | 5 | 5 | 5 | Xuất sắc |
+| 2 | **Nguyễn Đinh Anh Quân** | B24DCCE222 | 5 | 5 | 4 | 5 | 4 | Hoàn thành tốt |
+| 3 | **Nguyễn Đình Tiến** | B24DCCE264 | 5 | 5 | 5 | 5 | 4 | Hoàn thành tốt |
+| 4 | **Ứng Trọng Trình** | B24DCCE271 | 5 | 5 | 5 | 5 | 4 | Hoàn thành tốt |
 
 ---
 
@@ -354,4 +354,4 @@ Khi hoàn thành BTL, nhóm sẽ thống nhất cho điểm theo thang từ **0 
 - [ ] Đã chuẩn bị xong Slide báo cáo (15-20 slide) và phân đoạn cho từng thành viên trình bày.
 - [ ] Đã kiểm thử chạy demo mượt mà trên laptop cá nhân, quay sẵn video dự phòng.
 - [ ] Đã xuất file `Nhom1.docx`, `Nhom1.pdf`, `Nhom1_Slide.pptx`.
-- [ ] Nhóm trưởng đã upload bài lên `lmsattt` thành công và thông báo cho cả nhóm trước 23h59 ngày 05/10/2026.
+- [ ] Nhóm trưởng (Lê Anh Minh) đã upload bài lên `lmsattt` thành công và thông báo cho cả nhóm trước 23h59 ngày 05/10/2026.
