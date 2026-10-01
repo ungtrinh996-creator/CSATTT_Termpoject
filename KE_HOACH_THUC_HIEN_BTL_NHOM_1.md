@@ -68,60 +68,40 @@ Dựa trên cấu trúc chuẩn của Khoa ATTT, nội dung Báo cáo đề tài
 ```
 TRANG BÌA
 BẢNG PHÂN CÔNG NHIỆM VỤ NHÓM THỰC HIỆN
-BẢNG NHÓM TỰ ĐÁNH GIÁ (5 tiêu chí: Thái độ, Hoàn thành CV, Giao tiếp, Hợp tác, Lãnh đạo)
+BẢNG NHÓM TỰ ĐÁNH GIÁ
 MỤC LỤC
 DANH MỤC CÁC HÌNH VẼ
 DANH MỤC CÁC BẢNG BIỂU
 DANH MỤC CÁC TỪ VIẾT TẮT
 MỞ ĐẦU
-  - Tính cấp thiết của đề tài an toàn mạng đối với DoS/DDoS
-  - Mục tiêu nghiên cứu và sản phẩm đạt được
+  - Tính cấp thiết của đề tài
+  - Mục tiêu nghiên cứu
   - Đối tượng và phạm vi nghiên cứu
-  - Bố cục của báo cáo
+  - Bố cục báo cáo
 CHƯƠNG 1. TỔNG QUAN VỀ TẤN CÔNG VÀ PHÒNG CHỐNG DoS/DDoS
-  1.1 Khái niệm cơ bản về DoS và DDoS
-      1.1.1 Định nghĩa tấn công từ chối dịch vụ (DoS)
-      1.1.2 Tấn công từ chối dịch vụ phân tán (DDoS) và mạng Botnet
-      1.1.3 Hậu quả và thiệt hại do DoS/DDoS gây ra
-  1.2 Phân loại các dạng tấn công DoS/DDoS theo mô hình OSI
-      1.2.1 Tấn công tầng mạng/vận chuyển (Volumetric & Protocol Attacks: SYN Flood, UDP Flood, ICMP Flood)
-      1.2.2 Tấn công tầng ứng dụng (Application Layer Attacks - Layer 7: HTTP Flood, Slowloris, Slow POST)
-      1.2.3 Tấn công khuếch đại (Amplification/Reflection: DNS Amplification, NTP Amplification)
-  1.3 Tổng quan các nguyên lý và kỹ thuật phòng chống DoS/DDoS
-      1.3.1 Phòng thủ tại hạ tầng mạng (Firewall, ACL, Blackholing, BGP Anycast)
-      1.3.2 Phòng thủ tại máy chủ dịch vụ (Kernel hardening, Rate Limiting, Reverse Proxy)
-      1.3.3 Hệ thống phát hiện/ngăn chặn xâm nhập (IDS/IPS Snort, Suricata, WAF)
+  1.1 Khái niệm và đặc điểm của tấn công DoS/DDoS
+  1.2 Phân loại các hình thức tấn công DoS/DDoS
+  1.3 Nguyên lý và kỹ thuật phòng chống DoS/DDoS
   1.4 Kết chương
-CHƯƠNG 2. PHÂN TÍCH CÔNG CỤ TẤN CÔNG VÀ XÂY DỰNG GIẢI PHÁP PHÒNG CHỐNG
-  2.1 Lựa chọn công cụ tấn công demo (Đề xuất: Slowloris hoặc hping3 SYN Flood)
-      2.1.1 Giới thiệu công cụ đã chọn (Mục đích, đặc điểm nhận dạng)
-      2.1.2 Cơ chế hoạt động chi tiết của công cụ
-      2.1.3 Phân tích điểm yếu bị khai thác trên hệ thống nạn nhân
-  2.2 Phân tích và lựa chọn giải pháp phòng chống tương ứng
-      2.2.1 Mô hình giải pháp đề xuất (Ví dụ: Nginx Reverse Proxy + Rate Limit + Iptables / Fail2ban)
-      2.2.2 Cơ chế nhận diện và lọc lưu lượng tấn công
-      2.2.3 Cấu hình chi tiết các tham số phòng thủ
-  2.3 Kết chương
-CHƯƠNG 3. THỬ NGHIỆM KỊCH BẢN TẤN CÔNG VÀ ĐÁNH GIÁ GIẢI PHÁP BẢO VỆ
-  3.1 Thiết kế và xây dựng môi trường thử nghiệm (Lab Environment)
-      3.1.1 Sơ đồ mạng và thông số cấu hình các máy ảo (Attacker, Victim Web Server, Defense Gateway)
-      3.1.2 Các công cụ đo lường và giám sát (Wireshark, htop, netstat, Web benchmark ApacheBench)
-  3.2 Kịch bản 1: Thực nghiệm tấn công khi chưa bật giải pháp phòng chống
-      3.2.1 Quá trình triển khai tấn công
-      3.2.2 Phân tích trạng thái máy chủ (CPU, RAM, số lượng kết nối đang mở)
-      3.2.3 Đánh giá khả năng đáp ứng của dịch vụ đối với người dùng hợp lệ
-  3.3 Kịch bản 2: Triển khai giải pháp phòng chống và thực nghiệm lại
-      3.3.1 Kích hoạt và kiểm tra hoạt động của giải pháp phòng ngự
-      3.3.2 Thực hiện lại cuộc tấn công
-      3.3.3 Phân tích lưu lượng bị chặn và trạng thái phục vụ người dùng hợp lệ
-  3.4 Đánh giá và so sánh kết quả trước/sau khi phòng vệ
+CHƯƠNG 2. PHÂN TÍCH CÔNG CỤ TẤN CÔNG SLOWLORIS VÀ GIẢI PHÁP PHÒNG THỦ
+  2.1 Khái quát
+  2.2 Phân tích công cụ tấn công Slowloris
+      2.2.1 Cơ chế hoạt động và cách thức làm cạn kiệt tài nguyên
+      2.2.2 Dấu hiệu nhận diện trên hệ thống nạn nhân
+  2.3 Giải pháp phòng chống trên máy chủ web
+      2.3.1 Cơ chế kiểm soát lưu lượng và giới hạn kết nối bằng Nginx
+      2.3.2 Cấu hình tường lửa ngăn chặn nguồn tấn công
+      2.3.3 Đánh giá phạm vi hiệu quả và giới hạn của giải pháp
+  2.4 Kết chương
+CHƯƠNG 3. THỰC NGHIỆM VÀ ĐÁNH GIÁ KẾT QUẢ
+  3.1 Xây dựng môi trường thử nghiệm
+  3.2 Thực nghiệm tấn công khi chưa kích hoạt phòng thủ
+  3.3 Triển khai giải pháp phòng thủ và thực nghiệm lại
+  3.4 Đánh giá và so sánh kết quả
   3.5 Kết chương
 KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN
-  - Các kết quả chính nhóm đã đạt được
-  - Hạn chế của đề tài
-  - Hướng phát triển và mở rộng trong thực tế
 TÀI LIỆU THAM KHẢO
-PHỤ LỤC (Mã nguồn script, cấu hình cấu hình mẫu)
+PHỤ LỤC
 ```
 
 ---
@@ -131,7 +111,7 @@ PHỤ LỤC (Mã nguồn script, cấu hình cấu hình mẫu)
 Thời gian thực hiện từ **25/09/2026** đến **05/10/2026** (11 ngày làm việc tập trung).
 
 ```mermaid
-flowchart TD
+flowchart LR
     G1["Giai đoạn 1 (25/9 - 27/9)<br/>Khởi động, Nghiên cứu lý thuyết & Thống nhất Lab"]
     G2["Giai đoạn 2 (28/9 - 30/9)<br/>Dựng Lab, Thực nghiệm Tấn công & Phòng thủ, Bắt log"]
     G3["Giai đoạn 3 (01/10 - 03/10)<br/>Viết Báo cáo chi tiết (20-30 trang) & Làm Slide"]
