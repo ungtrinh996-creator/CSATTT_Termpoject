@@ -7,9 +7,10 @@
 
 Nhóm thiết lập mô hình thử nghiệm trên nền tảng ảo VMware Workstation trong phân vùng mạng cô lập (Host-only Network). Việc cô lập mạng giúp kiểm soát toàn bộ lưu lượng phát sinh, tránh gây ảnh hưởng tới hạ tầng mạng thực tế.
 
-Mô hình gồm hai nút máy ảo chính:
+Mô hình gồm ba thành phần chính:
 - **Máy tấn công (Attacker):** Kali Linux (IP: `192.168.106.129`), chạy công cụ SlowHTTPTest [8] để gửi lưu lượng HTTP Header chậm.
-- **Máy mục tiêu (Target):** Ubuntu Server 22.04 LTS (IP: `192.168.106.130`), chạy dịch vụ web Nginx phiên bản 1.18.0 trên cổng 80/TCP.
+- **Máy mục tiêu (Target):** Ubuntu Server 22.04 LTS (IP: `192.168.106.130`), chạy dịch vụ web Nginx phiên bản 1.18.0 trên cổng 80/TCP cùng kịch bản giám sát nội bộ `slowloris_monitor.py`.
+- **Máy trạm thăm dò bên ngoài (External Probe Client):** Máy khách gửi các yêu cầu HTTP GET định kỳ 1 giây qua giao tiếp mạng tới cổng 80 của máy chủ đích, ghi nhận độ trễ phản hồi mạng thực tế và mã trạng thái HTTP vào tệp `http_probe.csv`.
 
 ```mermaid
 graph LR
@@ -17,10 +18,13 @@ graph LR
         direction LR
         Attacker["Máy tấn công (Kali Linux)<br/>Công cụ: SlowHTTPTest (Slowloris)<br/>IP: 192.168.106.129"]
         Target["Máy chủ đích (Ubuntu Server 22.04)<br/>Dịch vụ: Nginx Web Server / Cổng 80<br/>IP: 192.168.106.130"]
-        Monitor["Tiến trình giám sát hệ thống<br/>(Monitor script / ss / top / curl)"]
+        Probe["Máy trạm kiểm thử bên ngoài (Client Probe)<br/>Đo độ trễ mạng thực tế (http_probe.csv)"]
+        Monitor["Tiến trình giám sát hệ thống nội bộ<br/>(slowloris_monitor.py / ss / top / curl)"]
         
         Attacker -->|Gửi chuỗi HTTP Header dở dang| Target
-        Target -.->|Ghi nhận metrics định kỳ 1s| Monitor
+        Probe -->|Gửi yêu cầu HTTP GET định kỳ 1s| Target
+        Target -.->|Ghi nhận metrics nội bộ định kỳ 1s| Monitor
+        Probe -.->|Ghi nhận độ trễ & mã phản hồi HTTP| Probe
     end
 ```
 *Hình 3.1 - Sơ đồ kiến trúc môi trường thử nghiệm mô phỏng tấn công và phòng thủ*
@@ -58,12 +62,14 @@ Máy chủ trả về mã phản hồi `HTTP/1.1 200 OK`, xác nhận dịch v�
 
 Nhóm thu thập thông số hoạt động của máy chủ trong 120 giây ở điều kiện bình thường (chưa có tải tấn công). Số liệu trạng thái nền (Baseline) cung cấp mốc đối chứng để đo lường mức độ ảnh hưởng của cuộc tấn công và hiệu quả phòng thủ.
 
-Tiến trình giám sát tự động (`slowloris_monitor.py`) ghi nhận định kỳ mỗi giây một lần các chỉ số kỹ thuật:
-- **Tổng số kết nối TCP cổng 80 (`total_80`):** Số socket TCP mở trên cổng dịch vụ web.
-- **Số kết nối `ESTABLISHED`:** Số socket TCP đã hoàn tất bắt tay ba bước và đang trao đổi dữ liệu.
-- **Tỷ lệ sử dụng CPU (`cpu_percent`):** Phần trăm năng lực vi xử lý hệ thống tiêu thụ.
-- **Bộ nhớ RAM (`mem_used_mb`, `mem_percent`):** Dung lượng (MB) và tỷ lệ (%) bộ nhớ vật lý sử dụng.
-- **Thời gian phản hồi HTTP (`reponse_sec`):** Độ trễ xử lý yêu cầu HTTP tiêu chuẩn gửi qua giao tiếp loopback (ms).
+Tiến trình giám sát ghi nhận định kỳ mỗi giây một lần các chỉ số kỹ thuật:
+- **Tổng số kết nối TCP cổng 80 (`total_80`):** Số socket TCP mở trên cổng dịch vụ web (trạng thái nền ghi nhận 2 socket ở chế độ `LISTEN`).
+- **Số kết nối `ESTABLISHED`:** Số socket TCP đã hoàn tất bắt tay ba bước và đang trao đổi dữ liệu (trạng thái nền duy trì ở mức 0).
+- **Tỷ lệ sử dụng CPU (`cpu_percent`):** Phần trăm năng lực vi xử lý hệ thống tiêu thụ (trạng thái nền dao động từ 4.5% đến 8.7%).
+- **Bộ nhớ RAM (`mem_used_mb`, `mem_percent`):** Dung lượng (MB) và tỷ lệ (%) bộ nhớ vật lý sử dụng (trạng thái nền tiêu thụ khoảng 552 MB – 576 MB, tương đương 16.5% – 17.2%).
+- **Thời gian phản hồi HTTP cục bộ (`reponse_sec`):** Độ trễ xử lý yêu cầu HTTP tiêu chuẩn gửi qua giao tiếp loopback `127.0.0.1` (ms), duy trì ở mức 0.45 ms – 0.90 ms.
+- **Thời gian phản hồi HTTP từ bên ngoài (`response_sec` trong `http_probe.csv`):** Độ trễ mạng thực tế khi máy khách bên ngoài gửi yêu cầu GET tới máy chủ qua card mạng (ms).
+
 
 
 ---
@@ -113,25 +119,26 @@ sudo tail -f /var/log/nginx/access.log /var/log/nginx/error.log
 
 ### 3.2.3 Phân tích kết quả 
 
-Số liệu thống kê trích xuất từ hai tệp nhật ký `baseline_500.csv` và `slowloris_monitor.csv` được tổng hợp tại Bảng 3.1:
+Số liệu thống kê trích xuất từ các tệp nhật ký `baseline_500.csv`, `slowloris_monitor.csv` và `http_probe.csv` được tổng hợp tại Bảng 3.1:
 
 *Bảng 3.1 - So sánh thông số hệ thống trước và trong khi chịu tấn công Slowloris (chưa phòng thủ)*
 
-| Chỉ số giám sát | Trạng thái nền (Baseline) | Khi bị tấn công (Bản 1) | Đánh giá kỹ thuật |
+| Chỉ số giám sát | Trạng thái nền (Baseline) | Khi bị tấn công (Bản 1) | Nhận xét kỹ thuật |
 | :--- | :---: | :---: | :--- |
-| **Tổng số TCP Connections** | 2 | ~481 | Tăng từ 2 lên trung bình 481 kết nối do công cụ liên tục mở socket TCP mới tới cổng 80. |
-| **Số kết nối ESTABLISHED** | 0 | ~442 | Chiếm dụng trung bình 442 kết nối dở dang (đỉnh điểm 500 kết nối), làm cạn kiệt bảng kết nối của máy chủ. |
-| **Mức tiêu thụ CPU (%)** | 8.7% | 38.3% | Tăng 4.4 lần. Đỉnh điểm chạm 100% trong pha bắt tay TCP hàng loạt, sau đó duy trì ở mức 38.3% để quản lý socket. |
-| **Mức tiêu thụ RAM** | 589.0 MB (17.59%) | 590.2 MB (17.63%) | Biến động 1.2 MB (tăng 0.04%). Slowloris không làm tràn bộ nhớ mà tập trung chiếm giữ slot kết nối. |
-| **Thời gian phản hồi HTTP cục bộ** | 0.90 ms | 0.48 ms | Phản hồi nội bộ qua loopback giữ ở mức dưới 1 ms do cơ chế epoll xử lý riêng, trong khi kết nối từ mạng ngoài bị nghẽn hoàn toàn. |
+| **Tổng socket TCP cổng 80 (`total_80`)** | 2 | 490.6 (đỉnh 552) | Lượng socket tăng nhanh do công cụ liên tục mở các phiên TCP mới đến cổng 80. |
+| **Số kết nối ESTABLISHED** | 0 | 441.6 (đỉnh 500) | Chiếm trần 500 kết nối từ giây thứ 25 và duy trì trạng thái dở dang trong suốt bài test. |
+| **Mức tiêu thụ CPU (%)** | 4.5% - 8.7% | 35.6% (đỉnh 100%) | CPU chạm 100% ở pha bắt tay hàng loạt ban đầu, sau đó duy trì quanh mức 35.6% để quản lý socket. |
+| **Mức tiêu thụ RAM** | 552 MB - 576 MB (16.5% - 17.2%) | 581.0 MB (17.36%) | Mức dùng RAM tăng nhẹ từ 5 MB đến 29 MB (dao động 576 MB - 584 MB), cho thấy Slowloris không gây áp lực lên bộ nhớ. |
+| **Thời gian phản hồi HTTP cục bộ** | 0.45 ms - 0.90 ms | 0.46 ms (0.457 ms) | Cơ chế epoll xử lý riêng socket nội bộ qua loopback, nên phản hồi cục bộ vẫn dưới 1 ms. |
+| **Thời gian phản hồi HTTP bên ngoài (`http_probe`)** | ~1.50 ms | 1.90 ms (đỉnh 7.22 ms) | 138/138 yêu cầu nhận mã 200, nhưng xuất hiện các nhịp tăng vọt lên 3.7 ms đến 7.2 ms cứ mỗi 10 giây khi công cụ gửi thêm header. |
 
 Từ số liệu thực nghiệm, nhóm ghi nhận các hiện tượng kỹ thuật:
 
-1. **Hiện tượng cạn kiệt bảng kết nối (Connection Pool Exhaustion):** Với tốc độ mở 20 kết nối mỗi giây, số kết nối `ESTABLISHED` chạm ngưỡng 500 ở giây thứ 26. Tệp `baseline_500.csv` ghi nhận số kết nối bị ngắt (`Closed`) luôn bằng 0 trong suốt 120 giây. Cấu hình mặc định của Nginx không giới hạn số kết nối từ một IP và giữ thời gian chờ header dài, khiến các socket dở dang bị chiếm dụng liên tục.
+1. **Chiếm dụng bảng kết nối:** SlowHTTPTest mở 20 kết nối mỗi giây, khiến số socket `ESTABLISHED` chạm ngưỡng 500 tại giây thứ 25. Tệp `baseline_500.csv` ghi nhận chỉ số `Closed` bằng 0 trong suốt 120 giây. Cấu hình mặc định của Nginx không giới hạn số kết nối từ một địa chỉ IP và để thời gian chờ header dài, tạo điều kiện cho các socket dở dang tồn tại liên tục.
 
-2. **Mức tiêu hao tài nguyên phần cứng:** Mức tiêu thụ RAM duy trì ở mức ~590 MB, khẳng định Slowloris không gây tràn bộ nhớ. Tải CPU tăng lên 100% tại giây thứ 2 khi máy chủ xử lý dồn dập các gói tin bắt tay TCP SYN/ACK, sau đó ổn định ở mức trung bình 38.3% để duy trì ngữ cảnh và bộ đếm thời gian của 500 socket.
+2. **Mức tiêu hao tài nguyên phần cứng:** RAM duy trì ổn định quanh mức 581 MB (17.36%). CPU tăng vọt lên 100% trong 2 giây đầu do phải xử lý dồn dập các gói tin bắt tay TCP SYN/ACK, sau đó dao động quanh mức trung bình 35.6% để duy trì ngữ cảnh cho 500 socket.
 
-3. **Tác động từ chối dịch vụ (DoS) đối với người dùng hợp lệ:** Lệnh curl nội bộ qua loopback (127.0.0.1) vẫn phản hồi trong 0.48 ms do kiến trúc hướng sự kiện (epoll) của Nginx xử lý riêng biệt các socket nội bộ. Tuy nhiên, các máy trạm ngoài mạng không thể thiết lập phiên mới vì 500 kết nối độc hại đã chiếm trọn giới hạn `worker_connections` của máy chủ.
+3. **Độ trễ truy cập thực tế qua mạng (`http_probe.csv`):** Khi đo cục bộ qua loopback (`127.0.0.1`), lệnh curl phản hồi trong 0.46 ms vì Nginx xử lý trực tiếp trên giao tiếp nội bộ. Ngược lại, máy thăm dò bên ngoài ghi nhận độ trễ trung bình 1.900 ms (trung vị 1.528 ms, đỉnh 7.223 ms). Cứ sau mỗi chu kỳ 10 giây (giây 8, 21, 29, 38, 58, 68, 78, 88, 98, 107, 117, 123), độ trễ lại tăng vọt do 500 kết nối độc hại đồng loạt gửi thêm các đoạn header dở dang (`-i 10`).
 
 ---
 
@@ -183,25 +190,27 @@ Chức năng của từng chỉ thị:
 
 ### 3.3.2 Đánh giá hiệu quả thực nghiệm sau khi áp dụng cấu hình Nginx
 
-Sau khi nạp cấu hình mới, nhóm chạy lại bài thử nghiệm SlowHTTPTest với cùng bộ tham số (`-c 500`, `-i 10`, `-r 20`, `-l 120`). Hai tệp `slowloris_monitor2.csv` và `baseline2_500.csv` ghi nhận diễn biến thực nghiệm:
-- **Từ giây 0 đến giây 10:** SlowHTTPTest mở kết nối với tốc độ trung bình 48 kết nối mỗi giây, đạt 478 kết nối mở tại giây thứ 10 (`Connected = 478`, `Closed = 1`).
-- **Tại giây thứ 10:** Chỉ thị `client_header_timeout 10s` kích hoạt trên các kết nối mở từ giây đầu tiên do client chưa gửi xong header.
-- **Từ giây 11 đến giây 20:** Nginx liên tục đóng các socket vi phạm: 48 kết nối tại giây 11, 237 kết nối tại giây 15 và 478 kết nối tại giây 20 (`Closed = 478`, `Connected = 22`).
-- **Kết quả ngắt tấn công sớm:** Nginx đóng 478 trên tổng số 500 kết nối mục tiêu (95.6%), làm đứt mạch duy trì kết nối của SlowHTTPTest. Công cụ nhận thấy cổng đích liên tục ngắt kết nối nên dừng kịch bản ở giây thứ 20 thay vì kéo dài 120 giây.
+Sau khi nạp cấu hình mới, nhóm chạy lại bài thử nghiệm SlowHTTPTest với cùng bộ tham số (`-c 500`, `-i 10`, `-r 20`, `-l 120`). Diễn biến ghi nhận từ `baseline2_500.csv` và `slowloris_monitor2.csv`:
+- **Khống chế trần kết nối ở mức 20:** Ngay từ giây đầu tiên, số kết nối mở thành công dừng lại ở mức tối đa 20 (`Connected = 20`) do chỉ thị `limit_conn addr 20`. Toàn bộ yêu cầu vượt ngưỡng bị chặn lại, khiến số kết nối chờ (`Pending`) trên máy tấn công tăng lên 461 ở giây thứ 10 (trung bình 392.8 kết nối trong suốt bài test).
+- **Ngắt kết nối quá hạn header (`client_header_timeout 10s`):** Với 20 kết nối mở đầu tiên, Nginx đóng toàn bộ tại giây thứ 11 (`Closed = 20`) do hết hạn 10 giây chờ header.
+- **Giải phóng socket theo từng đợt:** Nginx tiếp tục đóng các đợt kết nối tiếp theo: đạt 40 kết nối ở giây 21, 60 kết nối ở giây 32, 80 kết nối ở giây 47, 100 kết nối ở giây 80 và 120 kết nối ở giây 90 (`Closed = 120`).
+- **Triệt tiêu kết nối độc hại:** Từ giây thứ 90 đến khi kết thúc thử nghiệm ở giây 121, chỉ số `Connected` giữ nguyên ở mức 0. Trong tổng số 500 kết nối của kịch bản tấn công, 120 kết nối mở thành công đều bị đóng do timeout, 380 kết nối còn lại bị chặn ở trạng thái `Pending`.
 
 *Bảng 3.2 - So sánh thông số hệ thống trước và sau khi kích hoạt cấu hình phòng thủ Nginx*
 
-| Chỉ số giám sát | Trạng thái nền (Baseline) | Đã phòng thủ (Bản 2) | Đánh giá hiệu quả |
+| Chỉ số giám sát | Trạng thái nền (Baseline) | Đã phòng thủ (Bản 2) | Nhận xét kỹ thuật |
 | :--- | :---: | :---: | :--- |
-| **Tổng số TCP Connections** | 2 | ~404 | Giảm từ 481 xuống 404 kết nối. Nginx liên tục đóng các kết nối quá hạn header. |
-| **Số kết nối ESTABLISHED** | 0 | ~98 | Giảm 77.8% so với khi chưa phòng thủ (từ 442 xuống 98 kết nối). Máy chủ không còn bị chiếm giữ hàng trăm socket mở kéo dài. |
-| **Mức tiêu thụ CPU (%)** | 8.7% | 18.3% | Giảm 52.2% (từ 38.3% xuống 18.3%). CPU chỉ tăng trong 20 giây đầu rồi trở về trạng thái ổn định. |
-| **Mức tiêu thụ RAM** | 589.0 MB (17.59%) | 603.9 MB (18.04%) | Tăng 14.9 MB (2.5%). Mức tăng này do Nginx cấp phát 10 MB bộ nhớ chia sẻ (`zone=addr:10m`) và chi phí bảng trạng thái trong kernel. |
-| **Thời gian phản hồi HTTP** | 0.90 ms | 0.70 ms | Duy trì dưới 1 ms. Dịch vụ web hoạt động ổn định và sẵn sàng tiếp nhận người dùng hợp lệ. |
+| **Tổng socket TCP cổng 80 (`total_80`)** | 2 | 94.2 (đỉnh 151) | Giảm 80.8% so với khi chưa phòng thủ (từ 490.6 xuống 94.2 socket), giảm tải việc lưu vết socket trong kernel. |
+| **Số kết nối ESTABLISHED** | 0 | 9.1 (đỉnh 20) | Giảm 97.9% so với khi chưa phòng thủ (từ 441.6 xuống 9.1 kết nối). Chỉ thị limit_conn giới hạn cứng số socket cùng lúc từ một IP ở mức 20. |
+| **Số kết nối bị đóng (`Closed`)** | 0 | 120 kết nối | Nginx tự động ngắt kết nối theo chu kỳ 10 giây khi client không gửi xong header. |
+| **Mức tiêu thụ CPU (%)** | 4.5% - 8.7% | 36.8% (đỉnh 100%) | Tải CPU trung bình ở mức 36.8%, tập trung vào việc gửi gói TCP RST từ chối kết nối và giải phóng socket vi phạm. |
+| **Mức tiêu thụ RAM** | 552 MB - 576 MB (16.5% - 17.2%) | 555.0 MB (16.58%) | RAM dao động trong khoảng 548 MB đến 561 MB, thấp hơn mức 581 MB của bản chưa phòng thủ. |
+| **Thời gian phản hồi HTTP cục bộ** | 0.45 ms - 0.90 ms | 0.45 ms (0.450 ms) | Phản hồi nội bộ qua loopback giữ ở mức 0.45 ms. |
+| **Thời gian phản hồi HTTP bên ngoài (`http_probe`)** | ~1.50 ms | 1.90 ms (trung vị 1.53 ms) | 138/138 yêu cầu từ máy ngoài nhận mã 200, độ trễ trung bình 1.90 ms cho thấy dịch vụ vẫn đáp ứng bình thường. |
 
 ### 3.3.3 Phòng thủ bổ sung bằng Firewall (iptables)
 
-Dù Nginx đã đóng thành công các kết nối chậm, việc tiếp nhận hàng trăm kết nối đi vào tầng ứng dụng vẫn tiêu tốn tài nguyên bắt tay TCP và quản lý socket trong kernel. Để giảm tải cho Nginx, nhóm triển khai giải pháp lọc gói tin tại tầng nhân Linux bằng tường lửa `iptables` thông qua module `connlimit` [6].
+Dù Nginx đã đóng các kết nối chậm, việc tiếp nhận hàng trăm kết nối đi vào tầng ứng dụng vẫn tiêu tốn tài nguyên bắt tay TCP và quản lý socket trong kernel. Để giảm tải cho Nginx, nhóm triển khai giải pháp lọc gói tin tại tầng nhân Linux bằng tường lửa `iptables` qua module `connlimit` [6].
 
 Quy tắc cấu hình iptables:
 
@@ -217,7 +226,7 @@ sudo iptables -L INPUT -n -v
 ```
 
 Phân tích mô hình phòng thủ chiều sâu (Defense-in-Depth):
-- **Tầng mạng và vận chuyển (iptables):** Chặn đứng các kết nối vượt ngưỡng ngay tại tầng nhân Linux bằng gói tin `TCP RST`, ngăn socket đi vào hàng đợi của Nginx và tiết kiệm CPU.
+- **Tầng mạng và vận chuyển (iptables):** Chặn các kết nối vượt ngưỡng ngay tại tầng nhân Linux bằng gói tin `TCP RST`, ngăn socket đi vào hàng đợi của Nginx và tiết kiệm CPU.
 - **Tầng ứng dụng (Nginx):** Kiểm soát các kết nối gửi dữ liệu chậm trong giới hạn cho phép hoặc đến từ nhiều địa chỉ IP khác nhau, tự động hủy phiên sau 10 giây.
 
 Sự kết hợp này phân chia trách nhiệm rõ ràng giữa tầng 4 và tầng 7, bảo vệ dịch vụ web toàn diện hơn.
@@ -230,17 +239,19 @@ Nhóm tổng hợp các chỉ số định lượng then chốt giữa hai trạ
 
 *Bảng 3.3 - Tổng hợp hiệu quả các chỉ số đo lường giữa hai trạng thái thử nghiệm*
 
-| Tiêu chí đo lường | Trước khi phòng thủ (Bản 1) | Sau khi phòng thủ (Bản 2) | Mức độ cải thiện và đánh giá kỹ thuật |
+| Tiêu chí đo lường | Chưa phòng thủ (Bản 1) | Đã phòng thủ (Bản 2) | So sánh và đối chiếu kỹ thuật |
 | :--- | :---: | :---: | :--- |
-| **Số kết nối duy trì trung bình (`ESTABLISHED`)** | ~442 kết nối | ~98 kết nối | Giảm 77.8%. Các quy tắc giới hạn và timeout ngăn chặn việc chiếm giữ socket kéo dài. |
-| **Số kết nối tối đa bị máy chủ đóng (`Closed`)** | 0 kết nối | 478 kết nối | Cải thiện rõ rệt. Nginx chủ động đóng 478 socket vi phạm thời gian chờ thay vì duy trì vô hạn. |
-| **Tải tiêu thụ CPU trung bình** | 38.3% | 18.3% | Giảm 52.2% tải xử lý do hệ thống không phải duy trì ngữ cảnh cho hàng trăm socket dở dang. |
-| **Mức tiêu thụ bộ nhớ RAM** | ~590 MB | ~604 MB | Tăng 2.5% (~14 MB), dùng để lưu bảng theo dõi IP và trạng thái kết nối mạng. |
-| **Thời gian duy trì cuộc tấn công** | Kéo dài trọn vẹn 120 giây | Dừng ở giây thứ 20 | Rút ngắn 83.3% thời gian duy trì. Công cụ dừng sớm vì 95.6% kết nối bị máy chủ chủ động đóng. |
+| **Kết nối ESTABLISHED trung bình** | 441.6 (đỉnh 500) | 9.1 (đỉnh 20) | Giảm 97.9%. Chỉ thị limit_conn và iptables chặn trần ở mức 20 kết nối, ngăn việc chiếm dụng connection pool. |
+| **Tổng socket TCP cổng 80 (`total_80`)** | 490.6 (đỉnh 552) | 94.2 (đỉnh 151) | Giảm 80.8% lượng socket mở, giúp bảng trạng thái TCP trong kernel không bị quá tải. |
+| **Kết nối bị đóng do vi phạm (`Closed`)** | 0 | 120 kết nối | Chỉ thị client_header_timeout 10s tự động ngắt các kết nối không hoàn tất header theo chu kỳ. |
+| **Kết nối bị chặn ở hàng đợi (`Pending`)** | 0.2 (đỉnh 2) | 392.8 (đỉnh 461, cuối kỳ 380) | Các kết nối mở thêm từ máy tấn công bị từ chối ngay từ tầng mạng và chuyển sang trạng thái chờ. |
+| **Tải tiêu thụ CPU trung bình** | 35.6% (đỉnh 100%) | 36.8% (đỉnh 100%) | Tải CPU không đổi nhiều (35.6% so với 36.8%), nhưng chu kỳ xử lý chuyển sang từ chối kết nối và thu hồi socket. |
+| **Mức tiêu thụ bộ nhớ RAM** | 581.0 MB (17.36%) | 555.0 MB (16.58%) | Giảm 26 MB (4.5%), mức dùng RAM ổn định quanh 555 MB trong suốt 120 giây. |
+| **Truy cập thực tế từ bên ngoài (`http_probe`)** | 1.90 ms (xuất hiện đỉnh 7.22 ms) | 1.90 ms (trung vị 1.53 ms, 100% mã 200) | 138/138 gói tin thăm dò đều nhận mã 200, độ trễ trung vị 1.53 ms xác nhận dịch vụ vẫn phục vụ tốt client ngoài. |
 
-Kết quả thực nghiệm cho thấy tham số `client_header_timeout 10s` giữ vai trò quyết định trong việc hóa giải tấn công Slowloris. Máy chủ giải phóng 478 socket trong 10 giây (từ giây 11 đến giây 20), ngăn chặn nguy cơ cạn kiệt bảng kết nối.
+Kết quả thực nghiệm cho thấy tham số `client_header_timeout 10s` kết hợp với `limit_conn addr 20` giải quyết tốt bài toán cạn kiệt socket của Slowloris. Máy chủ chủ động ngắt 120 kết nối vi phạm và giữ 380 kết nối độc hại ở trạng thái chờ, giải phóng tài nguyên cho hệ thống.
 
-Mô hình phối hợp giữa iptables tại tầng 4 và Nginx tại tầng 7 duy trì thời gian phản hồi HTTP cục bộ dưới 1 ms. Nhờ đó, người dùng hợp lệ có thể truy cập dịch vụ bình thường ngay trong lúc cuộc tấn công diễn ra.
+Mô hình phối hợp giữa iptables tại tầng 4 và Nginx tại tầng 7 giữ thời gian phản hồi HTTP cục bộ dưới 0.5 ms và độ trễ truy cập từ mạng bên ngoài ở mức 1.90 ms. Người dùng hợp lệ có thể sử dụng dịch vụ bình thường ngay trong lúc cuộc tấn công diễn ra.
 
 ---
 
@@ -248,9 +259,9 @@ Mô hình phối hợp giữa iptables tại tầng 4 và Nginx tại tầng 7 d
 
 Chương 3 đã hoàn thành các nội dung thực nghiệm mô phỏng tấn công và đánh giá giải pháp phòng thủ trong môi trường ảo. Từ các số liệu đo lường thực tế, nhóm rút ra ba kết luận:
 
-1. **Đặc tính của Slowloris:** Cuộc tấn công khai thác giới hạn kết nối đồng thời của máy chủ web bằng cách gửi tiêu đề dở dang kéo dài. Mức sử dụng RAM và băng thông gần như không đổi, nhưng số socket `ESTABLISHED` đạt 442 kết nối và chiếm trọn tài nguyên phục vụ người dùng mới.
-2. **Hiệu quả cấu hình Nginx:** Việc kết hợp `client_header_timeout 10s` và `limit_conn addr 20` giúp Nginx nhận diện và đóng 478 kết nối vi phạm, giảm 77.8% số socket bị chiếm dụng và buộc công cụ tấn công dừng sớm ở giây thứ 20.
-3. **Giá trị của phòng thủ nhiều lớp:** Tường lửa iptables chặn kết nối vượt ngưỡng tại tầng 4 để giảm tải cho kernel, trong khi Nginx kiểm soát hành vi truyền header tại tầng 7. Sự kết hợp này bảo vệ máy chủ web trước các biến thể DoS dạng Slowloris và bảo đảm tính sẵn sàng liên tục của dịch vụ.
+1. **Đặc tính của Slowloris:** Cuộc tấn công khai thác cơ chế giữ kết nối của máy chủ web bằng cách gửi tiêu đề dở dang kéo dài. Mức sử dụng RAM không đổi nhiều (~581 MB), nhưng số kết nối `ESTABLISHED` duy trì ở mức trung bình 441.6 (đỉnh 500) và chiếm dụng tài nguyên phục vụ, gây dao động độ trễ mạng bên ngoài.
+2. **Hiệu quả cấu hình Nginx và iptables:** Việc kết hợp `client_header_timeout 10s`, `limit_conn addr 20` và quy tắc `connlimit 20` của iptables khống chế số socket `ESTABLISHED` không vượt quá 20 (giảm 97.9%), chủ động đóng 120 kết nối vi phạm thời gian chờ và chặn 380 kết nối ở trạng thái Pending, đưa số kết nối hoạt động về 0 ở giai đoạn sau.
+3. **Chất lượng dịch vụ cho người dùng thực tế:** Dữ liệu thăm dò mạng bên ngoài (`http_probe.csv`) ghi nhận 100% yêu cầu nhận mã 200 với độ trễ trung bình 1.90 ms, cho thấy dịch vụ web vẫn duy trì khả năng phục vụ khi chịu tải tấn công Slowloris.
 
 ---
 
