@@ -90,8 +90,9 @@ CHƯƠNG 2. PHÂN TÍCH CÔNG CỤ TẤN CÔNG SLOWLORIS VÀ GIẢI PHÁP PHÒNG
       2.2.2 Dấu hiệu nhận diện trên hệ thống nạn nhân
   2.3 Giải pháp phòng chống trên máy chủ web
       2.3.1 Cơ chế kiểm soát lưu lượng và giới hạn kết nối bằng Nginx
-      2.3.2 Cấu hình tường lửa ngăn chặn nguồn tấn công
-      2.3.3 Đánh giá phạm vi hiệu quả và giới hạn của giải pháp
+      2.3.2 Cấu hình tường lửa tầng mạng với iptables
+      2.3.3 Các giải pháp tự động hóa và tối ưu hóa mở rộng
+      2.3.4 Đánh giá phạm vi hiệu quả và giới hạn của giải pháp
   2.4 Kết chương
 CHƯƠNG 3. THỰC NGHIỆM VÀ ĐÁNH GIÁ KẾT QUẢ
   3.1 Xây dựng môi trường thử nghiệm
