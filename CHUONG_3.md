@@ -199,29 +199,6 @@ Sau khi nạp cấu hình mới, nhóm chạy lại bài thử nghiệm SlowHTTP
 | **Mức tiêu thụ RAM** | 589.0 MB (17.59%) | 603.9 MB (18.04%) | Tăng 14.9 MB (2.5%). Mức tăng này do Nginx cấp phát 10 MB bộ nhớ chia sẻ (`zone=addr:10m`) và chi phí bảng trạng thái trong kernel. |
 | **Thời gian phản hồi HTTP** | 0.90 ms | 0.70 ms | Duy trì dưới 1 ms. Dịch vụ web hoạt động ổn định và sẵn sàng tiếp nhận người dùng hợp lệ. |
 
-### 3.3.3 Phòng thủ bổ sung bằng Firewall (iptables)
-
-Dù Nginx đã đóng thành công các kết nối chậm, việc tiếp nhận hàng trăm kết nối đi vào tầng ứng dụng vẫn tiêu tốn tài nguyên bắt tay TCP và quản lý socket trong kernel. Để giảm tải cho Nginx, nhóm triển khai giải pháp lọc gói tin tại tầng nhân Linux bằng tường lửa `iptables` thông qua module `connlimit` [6].
-
-Quy tắc cấu hình iptables:
-
-```bash
-# Giới hạn mỗi IP chỉ được mở tối đa 20 kết nối TCP đồng thời tới cổng 80, từ chối kết nối thứ 21 bằng TCP RST
-sudo iptables -A INPUT -p tcp --dport 80 -m connlimit --connlimit-above 20 -j REJECT --reject-with tcp-reset
-```
-
-Kiểm tra quy tắc đã được nạp vào Kernel:
-
-```bash
-sudo iptables -L INPUT -n -v
-```
-
-Phân tích mô hình phòng thủ chiều sâu (Defense-in-Depth):
-- **Tầng mạng và vận chuyển (iptables):** Chặn đứng các kết nối vượt ngưỡng ngay tại tầng nhân Linux bằng gói tin `TCP RST`, ngăn socket đi vào hàng đợi của Nginx và tiết kiệm CPU.
-- **Tầng ứng dụng (Nginx):** Kiểm soát các kết nối gửi dữ liệu chậm trong giới hạn cho phép hoặc đến từ nhiều địa chỉ IP khác nhau, tự động hủy phiên sau 10 giây.
-
-Sự kết hợp này phân chia trách nhiệm rõ ràng giữa tầng 4 và tầng 7, bảo vệ dịch vụ web toàn diện hơn.
-
 ---
 
 ## 3.4 Đánh giá kết quả
@@ -250,7 +227,6 @@ Chương 3 đã hoàn thành các nội dung thực nghiệm mô phỏng tấn c
 
 1. **Đặc tính của Slowloris:** Cuộc tấn công khai thác giới hạn kết nối đồng thời của máy chủ web bằng cách gửi tiêu đề dở dang kéo dài. Mức sử dụng RAM và băng thông gần như không đổi, nhưng số socket `ESTABLISHED` đạt 442 kết nối và chiếm trọn tài nguyên phục vụ người dùng mới.
 2. **Hiệu quả cấu hình Nginx:** Việc kết hợp `client_header_timeout 10s` và `limit_conn addr 20` giúp Nginx nhận diện và đóng 478 kết nối vi phạm, giảm 77.8% số socket bị chiếm dụng và buộc công cụ tấn công dừng sớm ở giây thứ 20.
-3. **Giá trị của phòng thủ nhiều lớp:** Tường lửa iptables chặn kết nối vượt ngưỡng tại tầng 4 để giảm tải cho kernel, trong khi Nginx kiểm soát hành vi truyền header tại tầng 7. Sự kết hợp này bảo vệ máy chủ web trước các biến thể DoS dạng Slowloris và bảo đảm tính sẵn sàng liên tục của dịch vụ.
 
 ---
 
