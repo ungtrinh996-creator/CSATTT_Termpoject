@@ -58,22 +58,22 @@ Mỗi khi nhận thêm dữ liệu, máy chủ đặt lại bộ đếm timeout 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Attacker as Máy tấn công (Slowloris)
-    participant Server as Máy chủ Web (Apache / Nginx)
+    participant Attacker as "Máy tấn công (Slowloris)"
+    participant Server as "Máy chủ Web (Apache / Nginx)"
 
     Attacker->>Server: TCP SYN
     Server->>Attacker: TCP SYN + ACK
     Attacker->>Server: TCP ACK (Bắt tay 3 bước hoàn tất)
     
-    Attacker->>Server: Gửi Header dở dang: "GET / HTTP/1.1\r\nHost: target\r\n"
+    Attacker->>Server: Gửi Header dở dang (GET / HTTP/1.1 - Host: target)
     Note over Server: Máy chủ chờ chuỗi kết thúc CRLF CRLF
     
     Note over Attacker,Server: Sau 10 giây (trước khi Timeout hết hạn)
-    Attacker->>Server: Gửi Header rác: "X-a: b\r\n"
+    Attacker->>Server: Gửi Header phụ duy trì kết nối (X-a: b)
     Note over Server: Đặt lại bộ đếm Timeout về 0, tiếp tục giữ kết nối
     
     Note over Attacker,Server: Sau 10 giây tiếp theo
-    Attacker->>Server: Gửi Header rác: "X-b: c\r\n"
+    Attacker->>Server: Gửi Header phụ duy trì kết nối (X-b: c)
     Note over Server: Tiếp tục chiếm giữ socket trong thời gian dài
 ```
 *Hình 2.1 - Trình tự bắt tay TCP và duy trì kết nối dở dang của Slowloris*
@@ -112,17 +112,17 @@ Nhóm thiết kế mô hình phòng thủ hai tầng theo nguyên lý phòng th�
 
 ```mermaid
 flowchart LR
-    Traffic["Lưu lượng mạng bên ngoài<br/>(Người dùng hợp lệ & Máy tấn công)"] --> L1
+    Traffic["Lưu lượng mạng bên ngoài (Người dùng và Máy tấn công)"] --> L1
 
-    L1["<b>TẦNG MẠNG: TƯỜNG LỬA LINUX KERNEL</b><br/>(iptables module connlimit)<br/>• Giám sát cổng 80/TCP<br/>• Giới hạn tối đa 20 socket TCP đồng thời/IP<br/>• Phản hồi TCP RST hủy kết nối vượt ngưỡng ngay trong kernel"]
+    L1["TẦNG MẠNG: TƯỜNG LỬA LINUX KERNEL (iptables)<br/>- Module connlimit giám sát cổng 80/TCP<br/>- Giới hạn tối đa 20 socket TCP đồng thời mỗi IP<br/>- Phản hồi TCP RST hủy kết nối vượt ngưỡng trong kernel"]
     
-    L1 -->|Kết nối TCP hợp lệ (≤ 20 socket)| L2
-    L1 -.->|TCP RST (socket thứ 21+)| Block1["Chặn kết nối vượt trần socket"]
+    L1 -->|Kết nối TCP hợp lệ tối đa 20 socket| L2
+    L1 -.->|TCP RST từ socket thứ 21 trở lên| Block1["Chặn kết nối vượt trần socket"]
 
-    L2["<b>TẦNG ỨNG DỤNG: MÁY CHỦ WEB NGINX</b><br/>(Kiến trúc hướng sự kiện epoll)<br/>• client_header_timeout 10s: Ngắt kết nối gửi header dở dang<br/>• limit_conn addr 20: Từ chối kết nối vượt ngưỡng bằng mã 503<br/>• keepalive_timeout 10s: Thu hồi sớm socket rảnh rỗi"]
+    L2["TẦNG ỨNG DỤNG: MÁY CHỦ WEB NGINX (epoll)<br/>- client_header_timeout 10s: Ngắt kết nối header dở dang<br/>- limit_conn addr 20: Từ chối kết nối vượt ngưỡng mã 503<br/>- keepalive_timeout 10s: Thu hồi sớm socket rảnh rỗi"]
 
     L2 -->|Xử lý và phản hồi HTTP| Users["Người dùng hợp lệ nhận nội dung web (HTTP 200 OK)"]
-    L2 -.->|Mã lỗi HTTP 408 / 503| Block2["Ngắt kết nối treo & từ chối request vượt hạn ngạch"]
+    L2 -.->|Mã lỗi HTTP 408 hoặc 503| Block2["Ngắt kết nối treo và từ chối request vượt hạn ngạch"]
 ```
 *Hình 2.2 - Sơ đồ kiến trúc phòng thủ hai tầng bảo vệ máy chủ web*
 
